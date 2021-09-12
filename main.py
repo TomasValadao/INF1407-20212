@@ -1,6 +1,6 @@
 import config as CONFIG
 from datetime import datetime
-from os import abort, chdir, fork, getcwd, listdir
+from os import abort, chdir, fork, getcwd, listdir, path
 from socket import socket, getaddrinfo
 from socket import AF_INET, SOCK_STREAM, IPPROTO_TCP, AI_ADDRCONFIG, AI_PASSIVE, SOL_SOCKET, SO_REUSEADDR
 
@@ -100,15 +100,25 @@ class WebServer:
         return False
 
     def handleRequest(self, connection):
+        canBreakLoop = False
+        
         while True:
-            message = connection.recv(1024)
+            if canBreakLoop:
+                break
             
+            message = connection.recv(1024)
+
             if not message:
                 break
             
-            parsedMessage = message.decode("utf-8").split("\r\n")
+            decodedMessage = message.decode("utf-8")
             
-            if parsedMessage is None:
+            if decodedMessage[-4:] == "\r\n\r\n":
+                canBreakLoop = True
+
+            parsedMessage = decodedMessage.split("\r\n")
+            
+            if not parsedMessage:
                 break
 
             requestedPath = parsedMessage[0].split(" ")
@@ -122,11 +132,12 @@ class WebServer:
             if self.hasRequestedFile(filePath):
                 print("Requested file was found!")
                 
-                file = open(self.getFilePath(filePath), 'rb')
+                fullFilePath = self.getFilePath(filePath)
+                file = open(fullFilePath, 'rb')
                 content = file.read()
-                fileByteArray =  bytearray(content)
-                statusCode = "HTTP/1.1 200 OK\r\n"
+                byteArrayLength = path.getsize(fullFilePath)
                 
+                statusCode = "HTTP/1.1 200 OK\r\n"
                 fileContentType = self.getFileResponseType(filePath)
                 
                 if fileContentType == None:
@@ -137,18 +148,21 @@ class WebServer:
             else:
                 print("Requested file was not found!")
                 
-                file = open(self.getFilePath(self.notFoundHandler), 'rb')
+                fullFilePath = self.getFilePath(self.notFoundHandler)
+                file = open(fullFilePath, 'rb')
                 content = file.read()
-                fileByteArray =  bytearray(content)
-                statusCode = "HTTP/1.1 404 NOT FOUND\n\n"
-                fileType = "Content-Type: text/html\n"
+                byteArrayLength = path.getsize(fullFilePath)
+                
+                statusCode = "HTTP/1.1 404 NOT FOUND\r\n"
+                fileType = "Content-Type: text/html\r\n"
             
             connection.sendall(bytearray(statusCode, "utf-8"))
-            connection.sendall(bytearray("Server: Apache-Coyote/1.1\n", "utf-8"))
+            connection.sendall(bytearray("Server: Apache-Coyote/1.1\r\n", "utf-8"))
             connection.sendall(bytearray(fileType, "utf-8"))
-            connection.sendall(bytearray("Content-Length: %d\n" % len(fileByteArray), "utf-8"))
-            connection.sendall(bytearray("Date: %s\n" % datetime.now().ctime(), "utf-8"))
+            connection.sendall(bytearray("Content-Length: %d\r\n" % byteArrayLength, "utf-8"))
+            connection.sendall(bytearray("Date: %s\r\n" % datetime.now().ctime(), "utf-8"))
             connection.sendall(content)
+            connection.sendall(bytearray("\r\n\r\n", "utf-8"))
 
         connection.close()  
         exit()
@@ -166,16 +180,18 @@ class WebServer:
         while True:
             connection, client = self.__acceptConnection()
             print("Server connected with %s" % client[0])
-
+            
             pid = fork()
     
             if pid == 0:
-                self.handleRequest(self.__socket, connection)
+                self.handleRequest(connection)
                 print("Connection closed with %s" % client[0])
     
             else:
                 connection.close()
                 print("Connection closed with %s" % client[0])
+
+            
         return
 
 if __name__ == "__main__":
