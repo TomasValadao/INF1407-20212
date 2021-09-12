@@ -1,6 +1,6 @@
 import config as CONFIG
 from datetime import datetime
-from os import abort, chdir, getcwd, listdir #,fork
+from os import abort, chdir, fork, getcwd, listdir
 from socket import socket, getaddrinfo
 from socket import AF_INET, SOCK_STREAM, IPPROTO_TCP, AI_ADDRCONFIG, AI_PASSIVE, SOL_SOCKET, SO_REUSEADDR
 
@@ -122,8 +122,9 @@ class WebServer:
             if self.hasRequestedFile(filePath):
                 print("Requested file was found!")
                 
-                file = open(self.getFilePath(filePath))
-                fileByteArray = bytearray(file.read())
+                file = open(self.getFilePath(filePath), 'rb')
+                content = file.read()
+                fileByteArray =  bytearray(content)
                 statusCode = "HTTP/1.1 200 OK\r\n"
                 
                 fileContentType = self.getFileResponseType(filePath)
@@ -136,20 +137,21 @@ class WebServer:
             else:
                 print("Requested file was not found!")
                 
-                file = open(self.getFilePath(self.notFoundHandler))
-                fileByteArray =  bytearray(file.read())
+                file = open(self.getFilePath(self.notFoundHandler), 'rb')
+                content = file.read()
+                fileByteArray =  bytearray(content)
                 statusCode = "HTTP/1.1 404 NOT FOUND\n\n"
                 fileType = "Content-Type: text/html\n"
-                
-            connection.send(bytearray(statusCode, "utf-8"))
-            connection.send(bytearray("Server: Apache-Coyote/1.1\n", "utf-8"))
-            connection.send(bytearray(fileType, "utf-8"))
-            connection.send(bytearray("Content-Length: %d\n" % len(fileByteArray), "utf-8"))
-            connection.send(bytearray("Date: %s\n" % datetime.now().ctime(), "utf-8"))
-            connection.send(file.encode())
-           
-        #connection.close()  
-        #exit()
+            
+            connection.sendall(bytearray(statusCode, "utf-8"))
+            connection.sendall(bytearray("Server: Apache-Coyote/1.1\n", "utf-8"))
+            connection.sendall(bytearray(fileType, "utf-8"))
+            connection.sendall(bytearray("Content-Length: %d\n" % len(fileByteArray), "utf-8"))
+            connection.sendall(bytearray("Date: %s\n" % datetime.now().ctime(), "utf-8"))
+            connection.sendall(content)
+
+        connection.close()  
+        exit()
 
         return
 
@@ -164,13 +166,8 @@ class WebServer:
         while True:
             connection, client = self.__acceptConnection()
             print("Server connected with %s" % client[0])
-            
-            self.handleRequest(connection)
-            print("Connection closed with %s" % client[0])
-            connection.close() 
-            
-            """
-            #pid = fork()
+
+            pid = fork()
     
             if pid == 0:
                 self.handleRequest(self.__socket, connection)
@@ -179,7 +176,6 @@ class WebServer:
             else:
                 connection.close()
                 print("Connection closed with %s" % client[0])
-            """
         return
 
 if __name__ == "__main__":
