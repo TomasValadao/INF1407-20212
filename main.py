@@ -6,9 +6,10 @@ from socket import AF_INET, SOCK_STREAM, IPPROTO_TCP, AI_ADDRCONFIG, AI_PASSIVE,
 
 class WebServer:
     
-    def __init__(self, port, pathToFilesDir, notFoundHandler):
+    def __init__(self, port, pathToFilesDir, defaultFiles, notFoundHandler):
         self.port = port
         self.pathToFilesDir = pathToFilesDir
+        self.defaultFiles = defaultFiles
         self.notFoundHandler = notFoundHandler
         
         self.__hostAddress = None
@@ -146,9 +147,21 @@ class WebServer:
                 fileType = "Content-Type: %s\r\n" % fileContentType
                 
             else:
-                print("Requested file was not found!")
-                
-                fullFilePath = self.getFilePath(self.notFoundHandler)
+                print(f"Requested file {filePath} was not found!")
+
+                if filePath == '/':
+                    print("Trying to get default file...")
+                    fullFilePath = self.getFilePath(self.notFoundHandler) # Initialize fullFilePath with not found page in case no files are found
+
+                    for defaultFile in self.defaultFiles:
+                        if self.hasRequestedFile(defaultFile):
+                            fullFilePath = self.getFilePath(defaultFile)
+                            break
+
+                else:
+                    fullFilePath = self.getFilePath(self.notFoundHandler)
+
+                print('fullFilePath', fullFilePath)
                 file = open(fullFilePath, 'rb')
                 content = file.read()
                 byteArrayLength = path.getsize(fullFilePath)
@@ -159,10 +172,10 @@ class WebServer:
             connection.sendall(bytearray(statusCode, "utf-8"))
             connection.sendall(bytearray("Server: Apache-Coyote/1.1\r\n", "utf-8"))
             connection.sendall(bytearray(fileType, "utf-8"))
-            connection.sendall(bytearray("Content-Length: %d\r\n" % byteArrayLength, "utf-8"))
-            connection.sendall(bytearray("Date: %s\r\n" % datetime.now().ctime(), "utf-8"))
+            # connection.sendall(bytearray("Content-Length: %d\r\n" % byteArrayLength, "utf-8"))
+            connection.sendall(bytearray("Date: %s\r\n\r\n" % datetime.now().ctime(), "utf-8"))
             connection.sendall(content)
-            connection.sendall(bytearray("\r\n\r\n", "utf-8"))
+            # connection.sendall(bytearray("\r\n\r\n", "utf-8"))
 
         connection.close()  
         exit()
@@ -195,5 +208,5 @@ class WebServer:
         return
 
 if __name__ == "__main__":
-    server = WebServer(CONFIG.PORT, CONFIG.EXTENDED_PATH_TO_FILES, CONFIG.PATH_TO_404)
+    server = WebServer(CONFIG.PORT, CONFIG.EXTENDED_PATH_TO_FILES, CONFIG.DEFAULT_FILES, CONFIG.PATH_TO_404)
     server.runServer()
