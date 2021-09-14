@@ -1,115 +1,199 @@
-from os import abort, fork
-
-from config import PORT
-
+import config as CONFIG
+from datetime import datetime
+from os import abort, chdir, fork, getcwd, listdir, path
 from socket import socket, getaddrinfo
 from socket import AF_INET, SOCK_STREAM, IPPROTO_TCP, AI_ADDRCONFIG, AI_PASSIVE, SOL_SOCKET, SO_REUSEADDR
 
+class WebServer:
+    
+    def __init__(self, port, pathToFilesDir, notFoundHandler):
+        self.port = port
+        self.pathToFilesDir = pathToFilesDir
+        self.notFoundHandler = notFoundHandler
+        
+        self.__hostAddress = None
+        self.__socket = None
+        return
+    
+    def __setHostAddress(self):
+        try:
+            self.__hostAddress = getaddrinfo(
+                None,
+                self.port,
+                AF_INET,
+                SOCK_STREAM,
+                IPPROTO_TCP,
+                AI_ADDRCONFIG | AI_PASSIVE
+            )
+    
+        except:
+            print("Failed to set host address for our WebServer!")
+            abort()
+            
+        return
+    
+    def __setSocket(self):
+        self.__socket = socket(self.__hostAddress[0][0], self.__hostAddress[0][1])
 
-def handle_request(tcpSocket, connection):
-    tcpSocket.close()
+        if self.__socket is None:
+            print('Failed to create socket for our WebServer!')
+            abort()
+        
+        self.__socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        
+        return
+    
+    def __bindSocket(self):
+        try:
+            self.__socket.bind(('', self.port))
+    
+        except:
+            print('Failed to bind socket for our WebServer!')
+            abort()
+    
+        return
+    
+    def __enableConnectionAcceptance(self):
+        try:
+            self.__socket.listen(8)
+    
+        except:
+            print('Failed to initialize socket!')
+            abort()
+    
+        return
+    
+    def __acceptConnection(self):
+        (connection, client) = self.__socket.accept()
+        print('Server is connected with %s!' % client[0])
+    
+        return (connection, client)
+    
+    def getFileResponseType(self, file):
+        types = {
+            "png": "image/png",
+            "jpg": "image/jpeg",
+            "jpeg": "image/jpeg",
+            "gif": "image/gif",
+            "html": "text/html",
+            "js": "application/javascript"
+            }
+        
+        return types.get(file.split(".")[-1], None)
+        
+    def getFilePath(self, file):
+        return getcwd().replace("\\", "/") + file
+    
+    def hasRequestedFile(self, file):
+        fullRequestedFile = self.getFilePath(file)
+        
+        chdir(self.pathToFilesDir)
+        
+        for dirFile in listdir():
+            formattedDirFile = getcwd().replace("\\", "/") + "/" + dirFile
+            
+            if formattedDirFile == fullRequestedFile:
+                chdir("..")
+                return True
+            
+        chdir("..")    
+        return False
 
-    while True:
-        message = connection.recv(1024)
+    def handleRequest(self, connection):
+        canBreakLoop = False
+        
+        while True:
+            if canBreakLoop:
+                break
+            
+            message = connection.recv(1024)
 
-        if message is None:
-            break
+            if not message:
+                break
+            
+            decodedMessage = message.decode("utf-8")
+            
+            if decodedMessage[-4:] == "\r\n\r\n":
+                canBreakLoop = True
 
-        connection.send(
-            'HTTP/1.1 200 OK\nContent-Type: text/html\n\n'.encode())
-        connection.send("""
-            <html>
-            <body>
-            <h1>Hello World</h1> this is my server!
-            </body>
-            </html>
-        """.encode())  # Use triple-quote string.
+            parsedMessage = decodedMessage.split("\r\n")
+            
+            if not parsedMessage:
+                break
 
-    connection.close()
-    print('Connection closed')
-    exit()
+            requestedPath = parsedMessage[0].split(" ")
+            
+            if len(requestedPath) < 3:
+                print("Incorrect Get Request Path")
+                break
+            
+            filePath = requestedPath[1]
+            
+            if self.hasRequestedFile(filePath):
+                print("Requested file was found!")
+                
+                fullFilePath = self.getFilePath(filePath)
+                file = open(fullFilePath, 'rb')
+                content = file.read()
+                byteArrayLength = path.getsize(fullFilePath)
+                
+                statusCode = "HTTP/1.1 200 OK\r\n"
+                fileContentType = self.getFileResponseType(filePath)
+                
+                if fileContentType == None:
+                    break
 
+                fileType = "Content-Type: %s\r\n" % fileContentType
+                
+            else:
+                print("Requested file was not found!")
+                
+                fullFilePath = self.getFilePath(self.notFoundHandler)
+                file = open(fullFilePath, 'rb')
+                content = file.read()
+                byteArrayLength = path.getsize(fullFilePath)
+                
+                statusCode = "HTTP/1.1 404 NOT FOUND\r\n"
+                fileType = "Content-Type: text/html\r\n"
+            
+            connection.sendall(bytearray(statusCode, "utf-8"))
+            connection.sendall(bytearray("Server: Apache-Coyote/1.1\r\n", "utf-8"))
+            connection.sendall(bytearray(fileType, "utf-8"))
+            connection.sendall(bytearray("Content-Length: %d\r\n" % byteArrayLength, "utf-8"))
+            connection.sendall(bytearray("Date: %s\r\n" % datetime.now().ctime(), "utf-8"))
+            connection.sendall(content)
+            connection.sendall(bytearray("\r\n\r\n", "utf-8"))
 
-def connect(tcpSocket):
-    (connection, client) = tcpSocket.accept()
-    print('Server is connected with', client)
+        connection.close()  
+        exit()
 
-    return connection
+        return
 
+    def runServer(self):
+        self.__setHostAddress()
+        self.__setSocket()
+        self.__bindSocket()
+        self.__enableConnectionAcceptance()
+        
+        print("Server was fully configured! It is now running on PORT %d" % self.port)
+        
+        while True:
+            connection, client = self.__acceptConnection()
+            print("Server connected with %s" % client[0])
+            
+            pid = fork()
+    
+            if pid == 0:
+                self.handleRequest(connection)
+                print("Connection closed with %s" % client[0])
+    
+            else:
+                connection.close()
+                print("Connection closed with %s" % client[0])
 
-def listen(tcpSocket):
-    try:
-        tcpSocket.listen(0)
-
-    except:
-        print('Failed to initialize socket')
-        abort()
-
-    return
-
-
-def bind(tcpSocket, port):
-    try:
-        tcpSocket.bind(('', port))
-
-    except:
-        print('Failed to bind socket')
-        abort()
-
-    return
-
-
-def create_socket(host_address):
-    tcpSocket = socket(host_address[0][0], host_address[0][1])
-
-    if tcpSocket is None:
-        print('Failed to create socket')
-        abort()
-
-    return tcpSocket
-
-
-def get_host_address(port):
-    try:
-        address = getaddrinfo(
-            None,
-            port,
-            AF_INET,
-            SOCK_STREAM,
-            IPPROTO_TCP,
-            AI_ADDRCONFIG | AI_PASSIVE
-        )
-
-    except:
-        print("Failed to get host address")
-        abort()
-
-    return address
-
-
-def init():
-    host_address = get_host_address(PORT)
-    tcpSocket = create_socket(host_address)
-    tcpSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-    bind(tcpSocket, PORT)
-    listen(tcpSocket)
-
-    print('Server initialized on port', PORT)
-
-    while True:
-        connection = connect(tcpSocket)
-
-        if connection == -1:
-            continue
-
-        pid = fork()
-
-        if pid == 0:
-            handle_request(tcpSocket, connection)
-
-        else:
-            connection.close()
-
+            
+        return
 
 if __name__ == "__main__":
-    init()
+    server = WebServer(CONFIG.PORT, CONFIG.EXTENDED_PATH_TO_FILES, CONFIG.PATH_TO_404)
+    server.runServer()
