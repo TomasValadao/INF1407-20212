@@ -56,7 +56,7 @@ class WebServer:
     
     def __enableConnectionAcceptance(self):
         try:
-            self.__socket.listen(8)
+            self.__socket.listen(0)
     
         except:
             print('Failed to initialize socket!')
@@ -134,48 +134,42 @@ class WebServer:
                 print("Requested file was found!")
                 
                 fullFilePath = self.getFilePath(filePath)
-                file = open(fullFilePath, 'rb')
-                content = file.read()
-                byteArrayLength = path.getsize(fullFilePath)
-                
                 statusCode = "HTTP/1.1 200 OK\r\n"
-                fileContentType = self.getFileResponseType(filePath)
-                
-                if fileContentType == None:
-                    break
-
-                fileType = "Content-Type: %s\r\n" % fileContentType
                 
             else:
                 print(f"Requested file {filePath} was not found!")
+                statusCode = "HTTP/1.1 404 NOT FOUND\r\n"
 
                 if filePath == '/':
                     print("Trying to get default file...")
-                    fullFilePath = self.getFilePath(self.notFoundHandler) # Initialize fullFilePath with not found page in case no files are found
-
+                    fullFilePath = self.getFilePath(self.notFoundHandler)
+                    
                     for defaultFile in self.defaultFiles:
                         if self.hasRequestedFile(defaultFile):
                             fullFilePath = self.getFilePath(defaultFile)
+                            statusCode = "HTTP/1.1 200 OK\r\n"
                             break
 
                 else:
                     fullFilePath = self.getFilePath(self.notFoundHandler)
-
-                print('fullFilePath', fullFilePath)
-                file = open(fullFilePath, 'rb')
-                content = file.read()
-                byteArrayLength = path.getsize(fullFilePath)
                 
-                statusCode = "HTTP/1.1 404 NOT FOUND\r\n"
-                fileType = "Content-Type: text/html\r\n"
+                
+            file = open(fullFilePath, 'rb')
+            content = file.read()
+            byteArrayLength = path.getsize(fullFilePath)
+            fileContentType = self.getFileResponseType(fullFilePath)
+            
+            if fileContentType == None:
+                break
+            
+            fileType = "Content-Type: %s\r\n" % fileContentType
             
             connection.sendall(bytearray(statusCode, "utf-8"))
             connection.sendall(bytearray("Server: Apache-Coyote/1.1\r\n", "utf-8"))
             connection.sendall(bytearray(fileType, "utf-8"))
-            # connection.sendall(bytearray("Content-Length: %d\r\n" % byteArrayLength, "utf-8"))
+            connection.sendall(bytearray("Content-Length: %d\r\n" % byteArrayLength, "utf-8"))
             connection.sendall(bytearray("Date: %s\r\n\r\n" % datetime.now().ctime(), "utf-8"))
             connection.sendall(content)
-            # connection.sendall(bytearray("\r\n\r\n", "utf-8"))
 
         connection.close()  
         exit()
@@ -203,8 +197,6 @@ class WebServer:
             else:
                 connection.close()
                 print("Connection closed with %s" % client[0])
-
-            
         return
 
 if __name__ == "__main__":
