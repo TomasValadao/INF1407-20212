@@ -19,4 +19,9 @@ Pre-requisitos:
 7) Acessar Path Não Enviado: http://localhost:8080/<br/>
 
 
+References:<br/>
+1) Threading Example: https://www.geeksforgeeks.org/socket-programming-multi-threading-python/<br/>
+2) Threads: https://docs.python.org/3/library/threading.html<br/>
+3) Socket: https://docs.python.org/3/library/socket.html<br/>
+
 ## Trabalho 2
