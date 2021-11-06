@@ -25,3 +25,11 @@ References:<br/>
 3) Socket: https://docs.python.org/3/library/socket.html<br/>
 
 ## Trabalho 2
+Trabalho 2:<br/> 
+1611418 - Rodrigo Veiga<br/> 
+1620809 - Tomás Cavalcante Valadão<br/> 
+
+Site Django com o tema relacionado a Sócio-Torcedor:<br/> 
+1) Tela de Login<br/> 
+2) Tela de Escolha de Plano (Cliente ou Admin) [CRUD]<br/> 
+3) Tela de Benefícios estáticos<br/> 
