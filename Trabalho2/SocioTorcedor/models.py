@@ -7,5 +7,5 @@ class Usuario(models.Model):
     cpf = models.IntegerField(unique=True)
 
 class Plano(models.Model):
-    nome = models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=5, decimal_places=2)
