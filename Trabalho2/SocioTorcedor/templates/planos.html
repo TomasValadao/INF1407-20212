@@ -1,0 +1,18 @@
+<html>
+
+<head>
+    <title>Sócio Torcedor - Planos</title>
+</head>
+
+<body>
+    <h1>Sócio Torcedor - Planos</h1>
+    <h3>Confira aqui os planos disponíveis</h3>
+
+    <ul>
+        {% for plan in plans %}
+        <li>{{plan.name}} - R${{plan.price}}</li>
+        {% endfor %}
+    </ul>
+</body>
+
+</html>
