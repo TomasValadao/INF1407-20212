@@ -4,8 +4,8 @@ from django.db import models
 
 class Usuario(models.Model):
     name = models.CharField(max_length=40)
-    cpf = models.IntegerField(max_length=11, unique=True)
+    cpf = models.IntegerField(unique=True)
 
 class Plano(models.Model):
     nome = models.CharField(max_length=100)
-    price = models.DecimalField(decimal_places=2)
+    price = models.DecimalField(max_digits=2, decimal_places=2)
