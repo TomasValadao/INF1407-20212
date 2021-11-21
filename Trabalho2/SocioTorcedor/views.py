@@ -1,20 +1,21 @@
 from django.http.response import HttpResponse
 from django.shortcuts import redirect, render
+from django.views.generic.base import View
 from .models import Plano
 from .forms import UsuarioForm
 
-# Create your views here.
-def render_plans(request):
-    plans = Plano.objects.all()
+class PlansView(View):
+    def get(self, request, *args, **kwargs):
+        plans = Plano.objects.all()
 
-    return render(request, 'planos.html', {'plans': plans})
+        return render(request, 'planos.html', {'plans': plans})
 
-def create_user(request):
-    form = UsuarioForm(request.POST or None)
+class UserView(View):
+    def post(self, request, *args, **kwargs):
+        form = UsuarioForm(request.POST or None)
 
-    if form.is_valid():
-        form.save()
-        
-        return redirect('render_plans')
+        if form.is_valid():
+            form.save()
+            return redirect('render_plans')
 
-    return render(request, 'cadastro.html', {'form': form})
+        return render(request, 'cadastro.html', {'form': form})
