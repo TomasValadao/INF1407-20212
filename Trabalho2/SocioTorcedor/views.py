@@ -11,11 +11,13 @@ class PlansView(View):
         return render(request, 'planos.html', {'plans': plans})
 
 class UserView(View):
+    def get(self, request, *args, **kwargs):
+        context = {'formulario' : UsuarioForm}
+        return render(request, 'cadastro.html', context)
+
     def post(self, request, *args, **kwargs):
-        form = UsuarioForm(request.POST or None)
+        form = UsuarioForm(request.POST)
 
         if form.is_valid():
             form.save()
             return redirect('render_plans')
-
-        return render(request, 'cadastro.html', {'form': form})
