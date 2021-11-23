@@ -3,7 +3,7 @@ from django.http.response import HttpResponse
 from django.shortcuts import redirect, render
 from django.views.generic.base import View
 from django.views.generic.edit import UpdateView
-from .models import Plano
+from .models import Plano, PlanoAdquirido, Usuario
 from .forms import UsuarioForm
 
 class OverrideUpdateView(LoginRequiredMixin, UpdateView):
@@ -13,15 +13,22 @@ class OverrideUpdateView(LoginRequiredMixin, UpdateView):
         else:
             return redirect('sec-home')
 
-class PlansView(LoginRequiredMixin, View):
+class PlansView(View):
     def get(self, request, *args, **kwargs):
         plans = Plano.objects.all()
 
         return render(request, 'planos.html', {'plans': plans})
 
-class UserView(LoginRequiredMixin, View):
+class UserPlansView(View):
     def get(self, request, *args, **kwargs):
-        context = {'formulario' : UsuarioForm}
+        user = Usuario.objects.get(cpf='16592756799')
+        plans = PlanoAdquirido.objects.filter(usuario=user).all()
+
+        return render(request, 'planos_usuario.html', {'plans': plans})
+
+class UserView(View):
+    def get(self, request, *args, **kwargs):
+        context = {'form' : UsuarioForm}
         return render(request, 'cadastro.html', context)
 
     def post(self, request, *args, **kwargs):
