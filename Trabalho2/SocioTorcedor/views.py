@@ -19,12 +19,24 @@ class PlansView(View):
 
         return render(request, 'planos.html', {'plans': plans})
 
-class UserPlansView(View):
+class PlanoAdquiridoView(View):
     def get(self, request, *args, **kwargs):
         user = Usuario.objects.get(cpf='16592756799')
         plans = PlanoAdquirido.objects.filter(usuario=user).all()
 
         return render(request, 'planos_usuario.html', {'plans': plans})
+
+class PlanoAdquiridoDeleteView(View):
+    def get(self, request, pk, *args, **kwargs):
+        plano_adquirido = PlanoAdquirido.objects.get(pk=pk)
+        
+        return render(request, 'planoadquirido_confirm_delete.html', {'plan': plano_adquirido})
+
+    def post(self, request, pk, *args, **kwargs):
+        plano_adquirido = PlanoAdquirido.objects.get(pk=pk)
+        plano_adquirido.delete()
+
+        return redirect('render_my_plans')
 
 class UserView(View):
     def get(self, request, *args, **kwargs):

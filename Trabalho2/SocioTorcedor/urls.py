@@ -5,7 +5,8 @@ from . import views
 
 urlpatterns = [
     path('planos/', views.PlansView.as_view(), name='render_plans'),
-    path('planos/meus_planos', views.UserPlansView.as_view(), name='render_my_plans'),
+    path('planos/meus_planos/', views.PlanoAdquiridoView.as_view(), name='render_my_plans'),
+    path('planos/meus_planos/delete/<int:pk>/', views.PlanoAdquiridoDeleteView.as_view(), name='delete_my_plans'),
     path('cadastro/', views.UserView.as_view(), name='create_user'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/login/', LoginView.as_view(template_name='accounts/login.html'), name='login'),

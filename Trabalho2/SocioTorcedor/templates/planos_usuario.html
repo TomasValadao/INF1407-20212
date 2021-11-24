@@ -10,9 +10,20 @@
 
     <ul>
         {% for plan in plans %}
-        <li>{{plan.plano.name}} - R${{plan.plano.price}}</li>
+        <li>
+            <div>
+                {{plan.plano.name}} - R${{plan.plano.price}}
+                <a class="cancel_btn" href="{% url 'delete_my_plans' plan.id %}">Remover</a>
+            </div>
+        </li>
+        {% empty %}
+        <p>Você não possui planos ativos</p>
         {% endfor %}
     </ul>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    {% load static %}
+    <script src="{% static 'js/planos.js' %}"></script>
 </body>
 
 </html>
