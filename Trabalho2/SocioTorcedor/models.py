@@ -1,11 +1,12 @@
 from django.db import models
+from django.contrib.auth.models import User
 
-# Create your models here.
-
-class Usuario(models.Model):
-    name = models.CharField(max_length=40)
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    email = models.EmailField(blank=False)
     cpf = models.IntegerField(unique=True)
+    USERNAME_FIELD = 'username'
 
-class Plano(models.Model):
+class Subscription(models.Model):
     name = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=5, decimal_places=2)

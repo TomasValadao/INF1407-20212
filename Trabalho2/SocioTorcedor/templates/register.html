@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Registration Page</title>
+</head>
+<body>
+    <h1>Seja bem-vindo ao Sócio-Torcedor</h1>
+    <div>
+        {% if user.is_authenticated %}
+        <a href="{% url 'subscriptions' %}">Planos do Sócio-Torcedor</a>
+        {% endif %}
+
+        {% if not user.is_authenticated %}
+        <a href="{% url 'login' %}">Login</a>
+        |
+        <a href="{% url 'create_user' %}">Cadastre-se</a>
+        {% endif %}
+    </div>
+    <hr>
+        {% block title %}Registro de Usuário{% endblock %}
+        {% block content %}
+    <h2>Página de Cadastro</h2>
+    <form method="post">
+        {% csrf_token %}
+        <table class="formulario">
+            {{ user_profile.as_table}}
+            {{ auth_user.as_table}}
+        <tr>
+            <td></td>
+            <td><input type="submit" value="Registrar"></td>
+        </tr>
+        </table>
+    </form>
+        {% endblock %}
+</body>
+</html>
