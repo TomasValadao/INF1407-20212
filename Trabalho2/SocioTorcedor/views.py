@@ -39,19 +39,6 @@ class OverrideUpdateView(LoginRequiredMixin, UpdateView):
 
 #endregion
 
-#region User Actions
-
-class ProfileView(LoginRequiredMixin, View):
-    def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            redirect_url = reverse('subscriptions')
-
-            return redirect(f'{redirect_url}?user_id={request.user.id}')
-        else:
-            return redirect('account_login')
-
-#endregion
-
 #region Subscription Actions
 
 class SubscriptionView(LoginRequiredMixin, View):
