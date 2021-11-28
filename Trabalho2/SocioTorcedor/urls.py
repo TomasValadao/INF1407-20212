@@ -12,7 +12,7 @@ urlpatterns = [
     path('register/', views.RegisterView.as_view(), name='create_user'),
     path('accounts/login/', LoginView.as_view(template_name='accounts/login.html', success_url=reverse_lazy('subscriptions')), name='account_login'),
     path('accounts/logout/', LogoutView.as_view(next_page=reverse_lazy('account_login')), name='account_logout'),
-    path('accounts/update/<int:pk>/', views.OverrideUpdateView.as_view(template_name='accounts/update.html', success_url=reverse_lazy('account_login'), model=models.UserProfile, fields=['email', 'cpf']), name='account_update'),
+    path('accounts/update/<int:pk>/', views.OverrideUpdateView.as_view(template_name='accounts/update.html', success_url=reverse_lazy('account_login'), model=models.User, fields=['email']), name='account_update'),
     path('accounts/profile/', views.ProfileView.as_view(), name='profile'),
     path('accounts/password_change/', PasswordChangeView.as_view(template_name='accounts/password_change_form.html', success_url=reverse_lazy('account_password_change_done')), name='account_password_change'),
     path('accounts/password_change_done/', PasswordChangeDoneView.as_view(template_name='accounts/password_change_done.html'), name='account_password_change_done'),
