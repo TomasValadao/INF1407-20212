@@ -7,8 +7,6 @@ from django.views.generic.edit import UpdateView
 from .models import Plan, Subscription, UserProfile
 from .forms import UserProfileCreateForm, RegistrationForm
 
-import ipdb
-
 #region Auth Actions
 
 class RegisterView(View):
@@ -44,7 +42,6 @@ class OverrideUpdateView(LoginRequiredMixin, UpdateView):
 
 class ProfileView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        ipdb.set_trace()
         if request.user.is_authenticated:
             redirect_url = reverse('subscriptions')
 
