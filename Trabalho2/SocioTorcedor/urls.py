@@ -16,7 +16,7 @@ urlpatterns = [
     path('accounts/profile/', views.ProfileView.as_view(), name='profile'),
     path('accounts/password_change/', PasswordChangeView.as_view(template_name='accounts/password_change_form.html', success_url=reverse_lazy('account_password_change_done')), name='account_password_change'),
     path('accounts/password_change_done/', PasswordChangeDoneView.as_view(template_name='accounts/password_change_done.html'), name='account_password_change_done'),
-    path('accounts/password_reset/', PasswordResetView.as_view(template_name='accounts/password_reset_form.html', success_url=reverse_lazy('account_password_reset_done'), email_template_name='accounts/password_reset_email.html', subject_template_name='accounts/password_reset_subject.txt', from_email='valadaotomas@gmail.com'), name='account_password_reset'),
+    path('accounts/password_reset/', PasswordResetView.as_view(template_name='accounts/password_reset_form.html', success_url=reverse_lazy('account_password_reset_done'), email_template_name='accounts/password_reset_email.html', subject_template_name='accounts/password_reset_subject.txt', from_email='webmaster@meslin.com'), name='account_password_reset'),
     path('accounts/password_reset_done/', PasswordResetDoneView.as_view(template_name='accounts/password_reset_done.html'), name='account_password_reset_done'),
     path('accounts/password_reset_confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(template_name='accounts/password_reset_confirm.html', success_url=reverse_lazy('account_password_reset_complete')), name='account_password_reset_confirm'),
     path('accounts/password_reset_complete/', PasswordResetCompleteView.as_view(template_name='accounts/password_reset_complete.html'), name='account_password_reset_complete'),
