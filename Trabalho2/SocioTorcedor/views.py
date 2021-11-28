@@ -58,7 +58,7 @@ class SubscriptionView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         user_id = request.GET.get('user_id')
 
-        if request.user.is_authenticated and request.user.id == user_id:
+        if request.user.is_authenticated and user_id is not None and request.user.id == int(user_id):
             subscriptions = Subscription.objects.all()
 
             context = {
