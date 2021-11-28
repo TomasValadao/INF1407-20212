@@ -65,7 +65,6 @@ class PlansView(View):
 
 class SubscriptionView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        ipdb.set_trace()
         if request.user.is_authenticated:
             user = UserProfile.objects.get(user_id=request.user.id)
             subscriptions = Subscription.objects.filter(user=user).all()
