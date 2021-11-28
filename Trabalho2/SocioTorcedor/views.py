@@ -5,7 +5,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic.base import View
 from django.views.generic.edit import UpdateView
-from .models import Subscription
+from .models import Plan, Subscription, UserProfile
 from .forms import UserProfileCreateForm
 
 #region Auth Actions
@@ -52,20 +52,55 @@ class ProfileView(LoginRequiredMixin, View):
 
 #endregion
 
+#region Plan Actions
+
+class PlansView(View):
+    def get(self, request, *args, **kwargs):
+        plans = Plan.objects.all()
+
+        return render(request, 'planos.html', {'plans': plans})
+
+#endregion
+
 #region Subscription Actions
 
 class SubscriptionView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        user_id = request.GET.get('user_id')
+        if request.user.is_authenticated:
+            user = UserProfile.objects.get(id=request.user.id)
+            subscriptions = Subscription.objects.filter(user=user).all()
 
-        if request.user.is_authenticated and request.user.id == user_id:
-            subscriptions = Subscription.objects.all()
+            return render(request, 'planos_usuario.html', {'subscriptions': subscriptions})
+        else:
+            print('User is not authenticated')
+            return redirect('account_login')
 
-            context = {
-                'subscriptions': subscriptions
-            }
+    def post(self, request, pk, *args, **kwargs):
+        if request.user.is_authenticated:
+            plan = Plan.objects.get(pk=pk)
+            user = UserProfile.objects.get(id=request.user.id)
 
-            return render(request, 'subscriptions.html', context)
+            new_subscription = Subscription(user=user, plan=plan)
+            new_subscription.save()
+
+            return redirect('subscriptions')
+
+        else:
+            return redirect('account_login')
+
+class SubscriptionDeleteView(View):
+    def get(self, request, pk, *args, **kwargs):
+        subscription = Subscription.objects.get(pk=pk)
+        
+        return render(request, 'planoadquirido_confirm_delete.html', {'subscription': subscription})
+
+    def post(self, request, pk, *args, **kwargs):
+        if request.user.is_authenticated:
+            subscription = Subscription.objects.get(pk=pk)
+            subscription.delete()
+
+            return redirect('subscriptions')
+
         else:
             return redirect('account_login')
 

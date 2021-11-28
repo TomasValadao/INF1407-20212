@@ -4,7 +4,10 @@ from django.urls.base import reverse_lazy
 from . import views
 
 urlpatterns = [
+    path('plans/', views.PlansView.as_view(), name='render_plans'),
     path('subscriptions/', views.SubscriptionView.as_view(), name='subscriptions'),
+    path('subscriptions/create/<int:pk>/', views.SubscriptionView.as_view(), name='create_subscription'),
+    path('subscriptions/delete/<int:pk>/', views.SubscriptionDeleteView.as_view(), name='delete_subscription'),
     path('register/', views.RegisterView.as_view(), name='create_user'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/login/', LoginView.as_view(template_name='accounts/login.html', success_url=reverse_lazy('subscriptions')), name='account_login'),
