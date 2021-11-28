@@ -75,7 +75,6 @@ class SubscriptionView(LoginRequiredMixin, View):
 
             return render(request, 'planos_usuario.html', {'subscriptions': subscriptions})
         else:
-            print('User is not authenticated')
             return redirect('account_login')
 
     def post(self, request, pk, *args, **kwargs):
