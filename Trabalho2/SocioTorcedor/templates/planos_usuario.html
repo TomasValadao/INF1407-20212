@@ -9,15 +9,15 @@
     <h3>Confira aqui seus planos adquiridos</h3>
 
     <ul>
-        {% for plan in plans %}
+        {% for subscription in subscriptions %}
         <li>
             <div>
-                {{plan.plano.name}} - R${{plan.plano.price}}
-                <a class="cancel_btn" href="{% url 'delete_my_plans' plan.id %}">Remover</a>
+                {{subscription.plan.name}} - R${{subscription.plan.price}}
+                <a class="cancel_btn" href="{% url 'delete_subscription' subscription.id %}">Remover</a>
             </div>
         </li>
         {% empty %}
-        <p>Você não possui planos ativos</p>
+        <p>Você não possui planos ativos. <a href="{% url 'render_plans' %}">Clique aqui para ver nossos planos</a></p>
         {% endfor %}
     </ul>
 

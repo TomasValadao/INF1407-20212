@@ -66,19 +66,26 @@ class PlansView(View):
 
 class SubscriptionView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        user_id = request.GET.get('user_id')
-
-        if user_id is None:
-            return redirect('account_login')
-
-        if request.user.is_authenticated and request.user.id == int(user_id):
-            print('User is authenticated')
-            user = UserProfile.objects.get(id=user_id)
+        if request.user.is_authenticated:
+            user = UserProfile.objects.get(id=request.user.id)
             subscriptions = Subscription.objects.filter(user=user).all()
 
             return render(request, 'planos_usuario.html', {'subscriptions': subscriptions})
         else:
             print('User is not authenticated')
+            return redirect('account_login')
+
+    def post(self, request, pk, *args, **kwargs):
+        if request.user.is_authenticated:
+            plan = Plan.objects.get(pk=pk)
+            user = UserProfile.objects.get(id=request.user.id)
+
+            new_subscription = Subscription(user=user, plan=plan)
+            new_subscription.save()
+
+            return redirect('subscriptions')
+
+        else:
             return redirect('account_login')
 
 class SubscriptionDeleteView(View):
@@ -88,9 +95,13 @@ class SubscriptionDeleteView(View):
         return render(request, 'planoadquirido_confirm_delete.html', {'subscription': subscription})
 
     def post(self, request, pk, *args, **kwargs):
-        subscription = Subscription.objects.get(pk=pk)
-        subscription.delete()
+        if request.user.is_authenticated:
+            subscription = Subscription.objects.get(pk=pk)
+            subscription.delete()
 
-        return redirect('render_my_plans')
+            return redirect('subscriptions')
+
+        else:
+            return redirect('account_login')
 
 #endregion
