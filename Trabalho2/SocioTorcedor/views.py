@@ -5,9 +5,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic.base import View
 from django.views.generic.edit import UpdateView
-from .models import Plano, PlanoAdquirido, UserProfile, Usuario
-from .forms import UsuarioForm
-from .models import Subscription
+from .models import Plan, Subscription, UserProfile
 from .forms import UserProfileCreateForm
 
 #region Auth Actions
@@ -54,18 +52,33 @@ class ProfileView(LoginRequiredMixin, View):
 
 #endregion
 
+#region Plan Actions
+
+class PlansView(View):
+    def get(self, request, *args, **kwargs):
+        plans = Plan.objects.all()
+
+        return render(request, 'planos.html', {'plans': plans})
+
+#endregion
+
 #region Subscription Actions
 
 class SubscriptionView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         user_id = request.GET.get('user_id')
 
-        if request.user.is_authenticated and request.user.id == user_id:
+        if user_id is None:
+            return redirect('account_login')
+
+        if request.user.is_authenticated and request.user.id == int(user_id):
+            print('User is authenticated')
             user = UserProfile.objects.get(id=user_id)
-            subscriptions = Subscription.objects.filter(usuario=user).all()
+            subscriptions = Subscription.objects.filter(user=user).all()
 
             return render(request, 'planos_usuario.html', {'subscriptions': subscriptions})
         else:
+            print('User is not authenticated')
             return redirect('account_login')
 
 class SubscriptionDeleteView(View):
