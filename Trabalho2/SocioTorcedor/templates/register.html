@@ -5,7 +5,7 @@
 {% block content %}
 <h2>Página de Cadastro</h2>
 <form method="post">
-    //{% csrf_token %}
+    {% csrf_token %}
     <table class="formulario">
         {{ user_profile.as_table}}
         {{ auth_user.as_table}}
