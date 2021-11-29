@@ -1,29 +1,19 @@
-<html>
+{% extends 'accounts/base.html' %}
 
-<head>
-    <title>Sócio Torcedor - Meus Planos</title>
-</head>
+{% block title %}Meus planos{% endblock %}
 
-<body>
-    <h1>Sócio Torcedor - Meus Planos</h1>
-    <h3>Confira aqui seus planos adquiridos</h3>
-
-    <ul>
-        {% for subscription in subscriptions %}
-        <li>
-            <div>
-                {{subscription.plan.name}} - R${{subscription.plan.price}}
-                <a class="cancel_btn" href="{% url 'delete_subscription' subscription.id %}">Remover</a>
-            </div>
-        </li>
-        {% empty %}
-        <p>Você não possui planos ativos. <a href="{% url 'render_plans' %}">Clique aqui para ver nossos planos</a></p>
-        {% endfor %}
-    </ul>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    {% load static %}
-    <script src="{% static 'js/planos.js' %}"></script>
-</body>
-
-</html>
+{% block content %}
+<h3>Confira aqui seus planos adquiridos</h3>
+<ul>
+    {% for subscription in subscriptions %}
+    <li>
+        <div>
+            {{subscription.plan.name}} - R${{subscription.plan.price}}
+            <a class="cancel_btn" href="{% url 'delete_subscription' subscription.id %}">Remover</a>
+        </div>
+    </li>
+    {% empty %}
+    <p>Você não possui planos ativos. <a href="{% url 'render_plans' %}">Clique aqui para ver nossos planos</a></p>
+    {% endfor %}
+</ul>
+{% endblock %}

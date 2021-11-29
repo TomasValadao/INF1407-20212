@@ -1,29 +1,20 @@
-<html>
+{% extends 'accounts/base.html' %}
 
-<head>
-    <title>Sócio Torcedor - Planos</title>
-</head>
+{% block title %}Planos{% endblock %}
 
-<body>
-    <h1>Sócio Torcedor - Planos</h1>
-    <h3>Confira aqui os planos disponíveis</h3>
+{% block content %}
+<h3>Confira aqui os planos disponíveis</h3>
 
-    <ul>
-        {% for plan in plans %}
-        <li>
-            <p>{{plan.name}} - R${{plan.price}}</p>
+<ul>
+    {% for plan in plans %}
+    <li>
+        <p>{{plan.name}} - R${{plan.price}}</p>
 
-            {% if user.is_authenticated %}
-            {% csrf_token %}
-            <a class="subscribeBtn" href="{% url 'create_subscription' plan.id %}">Adquirir</a>
-            {% endif %}
-        </li>
-        {% endfor %}
-    </ul>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    {% load static %}
-    <script src="{% static 'js/planos.js' %}"></script>
-</body>
-
-</html>
+        {% if user.is_authenticated %}
+        {% csrf_token %}
+        <a class="subscribeBtn" href="{% url 'create_subscription' plan.id %}">Adquirir</a>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

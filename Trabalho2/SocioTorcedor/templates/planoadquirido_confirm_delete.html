@@ -1,21 +1,11 @@
-<html>
+{% extends 'accounts/base.html' %}
 
-<head>
-    <title>Sócio Torcedor - Meus Planos</title>
-</head>
+{% block title %}Meus planos{% endblock %}
 
-<body>
-    <h1>Sócio Torcedor - Meus Planos</h1>
+{% block content %}
+<form method="post">{% csrf_token %}
+    <p>Voce tem certeza que deseja remover o plano {{plan.plano.name}}?</p>
 
-    <form method="post">{% csrf_token %}
-        <p>Voce tem certeza que deseja remover o plano {{plan.plano.name}}?</p>
-
-        <input type="submit" value="Confirm">
-    </form>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    {% load static %}
-    <script src="{% static 'js/planos.js' %}"></script>
-</body>
-
-</html>
+    <input type="submit" value="Confirm">
+</form>
+{% endblock %}
