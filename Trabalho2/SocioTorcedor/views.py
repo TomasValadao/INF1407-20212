@@ -1,4 +1,3 @@
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import HttpResponse
 from django.shortcuts import redirect, render
@@ -6,20 +5,20 @@ from django.urls import reverse
 from django.views.generic.base import View
 from django.views.generic.edit import UpdateView
 from .models import Plan, Subscription, UserProfile
-from .forms import UserProfileCreateForm
+from .forms import UserProfileCreateForm, RegistrationForm
 
 #region Auth Actions
 
 class RegisterView(View):
     def get(self, request, *args, **kwargs):
         context = {
-            'auth_user' : UserCreationForm,
+            'auth_user' : RegistrationForm,
             'user_profile' : UserProfileCreateForm
         }
         return render(request, 'register.html', context)
 
     def post(self, request, *args, **kwargs):
-        auth_form = UserCreationForm(request.POST)
+        auth_form = RegistrationForm(request.POST)
         user_profile_form = UserProfileCreateForm(request.POST)
 
         if auth_form.is_valid() and user_profile_form.is_valid():
@@ -67,18 +66,17 @@ class PlansView(View):
 class SubscriptionView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            user = UserProfile.objects.get(id=request.user.id)
+            user = UserProfile.objects.get(user_id=request.user.id)
             subscriptions = Subscription.objects.filter(user=user).all()
 
             return render(request, 'planos_usuario.html', {'subscriptions': subscriptions})
         else:
-            print('User is not authenticated')
             return redirect('account_login')
 
     def post(self, request, pk, *args, **kwargs):
         if request.user.is_authenticated:
             plan = Plan.objects.get(pk=pk)
-            user = UserProfile.objects.get(id=request.user.id)
+            user = UserProfile.objects.get(user_id=request.user.id)
 
             new_subscription = Subscription(user=user, plan=plan)
             new_subscription.save()

@@ -32,4 +32,3 @@ Trabalho 2:<br/>
 Site Django com o tema relacionado a Sócio-Torcedor:<br/> 
 1) Tela de Login<br/> 
 2) Tela de Escolha de Plano (Cliente ou Admin) [CRUD]<br/> 
-3) Tela de Benefícios estáticos<br/> 
