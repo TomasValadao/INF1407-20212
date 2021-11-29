@@ -1,2 +1,3 @@
 release: python manage.py migrate
 web: gunicorn Trabalho2.wsgi --log-file -
+web: python manage.py runserver
