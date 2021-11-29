@@ -30,5 +30,9 @@ Trabalho 2:<br/>
 1620809 - Tomás Cavalcante Valadão<br/> 
 
 Site Django com o tema relacionado a Sócio-Torcedor:<br/> 
-1) Tela de Login<br/> 
-2) Tela de Escolha de Plano (Cliente ou Admin) [CRUD]<br/> 
+1) Cadastro de usuário<br/> 
+1) Tela de login<br/> 
+2) Tela com as assinaturas do usuário logado<br/>
+3) Chamadas AJAX para criar / remover assinaturas de sócio torcedor<br/> 
+
+https://socio-torcedor-inf1407.herokuapp.com/accounts/login/
